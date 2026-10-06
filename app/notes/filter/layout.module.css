@@ -1,0 +1,15 @@
+.container {
+  display: flex;
+  gap: 24px;
+  width: 100%;
+  min-height: 100vh;
+}
+
+.sidebar {
+  width: 280px;
+  flex-shrink: 0;
+}
+
+.notesWrapper {
+  flex-grow: 1;
+}

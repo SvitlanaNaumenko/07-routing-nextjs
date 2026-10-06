@@ -3,7 +3,7 @@ import type { Note, CreateNoteDto } from '../types/note';
 
 export type { Note, CreateNoteDto };
 
-// Створюємо окремий екземпляр axios із базовою URL-адресою бекенду
+// Створено окремий екземпляр axios із базовою URL-адресою бекенду
 const api = axios.create({
   baseURL: 'https://notehub-public.goit.study/api',
   headers: {
@@ -17,11 +17,12 @@ export interface FetchNotesResponse {
   totalPages: number;
 }
 
-// Параметри для пагінації та пошуку
+// Параметри для пагінації, пошуку та фільтрації за тегом
 export interface FetchNotesParams {
   page?: number;
   perPage?: number;
   search?: string;
+  tag?: string; // Додано параметр для фільтрації за тегом
 }
 
 // Функція для отримання однієї нотатки за її id
@@ -29,9 +30,19 @@ export const fetchNoteById = async (id: string): Promise<Note> => {
   const response = await api.get<Note>(`/notes/${id}`);
   return response.data;
 };
-// 1. Отримання нотаток з пагінацією та фільтрацією за пошуковим словом
+
+// 1. Отримання нотаток з пагінацією та фільтрацією за пошуковим словом і тегом
 export const fetchNotes = async (params: FetchNotesParams = {}): Promise<FetchNotesResponse> => {
-  const response = await api.get<FetchNotesResponse>('/notes', { params });
+  const queryParams: FetchNotesParams = { ...params };
+
+  // Якщо тег дорівнює 'all', видаляємо його з параметрів, щоб не відправляти на бекенд
+  if (queryParams.tag === 'all') {
+    delete queryParams.tag;
+  }
+
+  const response = await api.get<FetchNotesResponse>('/notes', {
+    params: queryParams,
+  });
   return response.data;
 };
 

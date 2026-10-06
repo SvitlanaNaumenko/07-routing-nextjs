@@ -1,17 +1,22 @@
 'use client';
+
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient, keepPreviousData } from '@tanstack/react-query';
 import { useDebouncedCallback } from 'use-debounce';
 import css from './Notes.module.css';
-import NoteList from '../../components/NoteList/NoteList';
-import SearchBox from '../../components/SearchBox/SearchBox';
-import Pagination from '../../components/Pagination/Pagination';
-import Modal from '../../components/Modal/Modal';
-import NoteForm from '../../components/NoteForm/NoteForm';
-import { fetchNotes, createNote } from '../../services/noteService';
-import type { CreateNoteDto } from '../../types/note';
+import NoteList from '../../../../components/NoteList/NoteList';
+import SearchBox from '../../../../components/SearchBox/SearchBox';
+import Pagination from '../../../../components/Pagination/Pagination';
+import Modal from '../../../../components/Modal/Modal';
+import NoteForm from '../../../../components/NoteForm/NoteForm';
+import { fetchNotes, createNote } from '../../../../services/noteService';
+import type { CreateNoteDto } from '../../../../types/note';
 
-export function NotesClient() {
+interface NotesClientProps {
+  tag?: string;
+}
+
+export default function NotesClient({ tag }: NotesClientProps) {
   const queryClient = useQueryClient();
 
   const [inputValue, setInputValue] = useState('');
@@ -29,9 +34,16 @@ export function NotesClient() {
     debouncedSetSearch(value);
   };
 
+  // Передаем tag в queryKey и queryFn
   const { data, isLoading, isError } = useQuery({
-    queryKey: ['notes', searchQuery, page],
-    queryFn: () => fetchNotes({ page, perPage: 12, search: searchQuery }),
+    queryKey: ['notes', { tag, page, search: searchQuery }],
+    queryFn: () =>
+      fetchNotes({
+        page,
+        perPage: 12,
+        search: searchQuery,
+        tag,
+      }),
     placeholderData: keepPreviousData,
   });
 
@@ -70,7 +82,7 @@ export function NotesClient() {
 
       {data && <NoteList notes={data.notes} />}
 
-      {/* Умовний рендеринг модалки */}
+      {/* Условный рендеринг модалки */}
       {isModalOpen && (
         <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)}>
           <NoteForm onSubmit={handleCreateNote} onCancel={() => setIsModalOpen(false)} />
